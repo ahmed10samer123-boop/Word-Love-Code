@@ -23,8 +23,7 @@ var S = {
     if (i !== -1) {
       S.UI.simulate(decodeURI(action).substring(i + 3));
     } else {
-      // تم حذف الجملة القديمة من هنا تماماً لتبدأ الحركة فوراً بالعد التنازلي والمربع
-      S.UI.simulate("|#countdown 3||#rectangle|");
+      S.UI.simulate("|#countdown 3||Are|You|Ready?||#rectangle|");
     }
 
     // Add a flag to track animation completion
@@ -98,7 +97,7 @@ S.Drawing = (function () {
 S.UI = (function () {
   var canvas = document.querySelector('.canvas'),
     interval,
-    isTouch = false, //('ontouchstart' in window || navigator.msMaxTouchPoints),
+    isTouch = false, 
     currentAction,
     resizeTimer,
     time,
@@ -152,10 +151,7 @@ S.UI = (function () {
       value,
       current;
 
-    // overlay.classList.remove('overlay--visible');
     sequence = typeof (value) === 'object' ? value : sequence.concat(value.split('|'));
-    // input.value = '';
-    // checkInputWidth();
 
     timedAction(function (index) {
       current = sequence.shift();
@@ -213,7 +209,7 @@ S.UI = (function () {
         default:
           S.Shape.switchShape(S.ShapeBuilder.letter(current[0] === cmd ? 'What?' : current));
       }
-    }, 2000, sequence.length);
+    }, 3500, sequence.length);
   }
 
   function checkInputWidth(e) {
@@ -240,15 +236,10 @@ S.UI = (function () {
         performAction(input.value);
       }
     });
-
-    canvas.addEventListener('click', function (e) {
-      overlay.classList.remove('overlay--visible');
-    });
   }
 
   function init() {
     bindEvents();
-    // input.focus();
     isTouch && document.body.classList.add('touch');
   }
 
@@ -439,10 +430,10 @@ S.Dot.prototype = {
 
 
 S.ShapeBuilder = (function () {
-  var gap = 13,
+  var gap = 9,
     shapeCanvas = document.createElement('canvas'),
     shapeContext = shapeCanvas.getContext('2d'),
-    fontSize = 500,
+    fontSize = 350,
     fontFamily = 'Avenir, Helvetica Neue, Helvetica, Arial, sans-serif';
 
   function fit() {
@@ -553,15 +544,15 @@ S.ShapeBuilder = (function () {
 
       var elements = document.getElementsByClassName('namebox');
       for (var i = 0; i < elements.length; i++) {
-        elements[i].style.opacity = 1; // Set opacity to 100%
+        elements[i].style.opacity = 1; 
       }
       var settings = {
         particles: {
-          length: 500, // maximum amount of particles
-          duration: 2, // particle duration in sec
-          velocity: 100, // particle velocity in pixels/sec
-          effect: -0.75, // play with this for a nice effect
-          size: 30, // particle size in pixels
+          length: 500, 
+          duration: 2, 
+          velocity: 100, 
+          effect: -0.75, 
+          size: 30, 
         },
       };
       (
@@ -640,25 +631,19 @@ S.ShapeBuilder = (function () {
         };
         return Particle;
       })();
-      /*
-      
-      * ParticlePool class
-      
-      */
+
       var ParticlePool = (function () {
         var particles,
           firstActive = 0,
           firstFree = 0,
           duration = settings.particles.duration;
         function ParticlePool(length) {
-          // create and populate particle pool
           particles = new Array(length);
           for (var i = 0; i < particles.length; i++)
             particles[i] = new Particle();
         }
         ParticlePool.prototype.add = function (x, y, dx, dy) {
           particles[firstFree].initialize(x, y, dx, dy);
-          // handle circular queue
           firstFree++;
           if (firstFree == particles.length) firstFree = 0;
           if (firstActive == firstFree) firstActive++;
@@ -666,7 +651,6 @@ S.ShapeBuilder = (function () {
         };
         ParticlePool.prototype.update = function (deltaTime) {
           var i;
-          // update active particles
           if (firstActive < firstFree) {
             for (i = firstActive; i < firstFree; i++)
               particles[i].update(deltaTime);
@@ -677,14 +661,12 @@ S.ShapeBuilder = (function () {
             for (i = 0; i < firstFree; i++)
               particles[i].update(deltaTime);
           }
-          // remove inactive particles
           while (particles[firstActive].age >= duration && firstActive != firstFree) {
             firstActive++;
             if (firstActive == particles.length) firstActive = 0;
           }
         };
         ParticlePool.prototype.draw = function (context, image) {
-          // draw active particles
           if (firstActive < firstFree) {
             for (i = firstActive; i < firstFree; i++)
               particles[i].draw(context, image);
@@ -698,17 +680,12 @@ S.ShapeBuilder = (function () {
         };
         return ParticlePool;
       })();
-      /*
-      
-      * Putting it all together
-      
-      */
+
       (function (canvas) {
         var context = canvas.getContext('2d'),
           particles = new ParticlePool(settings.particles.length),
-          particleRate = settings.particles.length / settings.particles.duration, // particles/sec
+          particleRate = settings.particles.length / settings.particles.duration, 
           time;
-        // get point on heart with -PI <= t <= PI
         function pointOnHeart(t) {
           return new Point(
             160 * Math.pow(Math.sin(t), 3),
@@ -717,68 +694,148 @@ S.ShapeBuilder = (function () {
 
         }
 
-        // creating the particle image using a dummy canvas
-
         var image = (function () {
           var canvas = document.createElement('canvas'),
             context = canvas.getContext('2d');
           canvas.width = settings.particles.size;
           canvas.height = settings.particles.size;
-          // helper function to create the path
           function to(t) {
             var point = pointOnHeart(t);
             point.x = settings.particles.size / 2 + point.x * settings.particles.size / 350;
             point.y = settings.particles.size / 2 - point.y * settings.particles.size / 350;
             return point;
           }
-          // create the path
           context.beginPath();
           var t = -Math.PI;
           var point = to(t);
           context.moveTo(point.x, point.y);
           while (t < Math.PI) {
-            t += 0.01; // baby steps!
+            t += 0.01; 
             point = to(t);
             context.lineTo(point.x, point.y);
           }
           context.closePath();
-          // create the fill
           context.fillStyle = '#ff30c5';
-          // context.fillStyle = '#ea80b0';
           context.fill();
-          // create the image
           var image = new Image();
           image.src = canvas.toDataURL();
           return image;
         })();
-        // render that thing!
+        
+        // مصفوفة لتخزين الصواريخ والانفجارات
+        var fireworks = [];
+
         function render() {
-          // next animation frame
           requestAnimationFrame(render);
-          // update time
           var newTime = new Date().getTime() / 1000,
             deltaTime = newTime - (time || newTime);
           time = newTime;
-          // clear canvas
           context.clearRect(0, 0, canvas.width, canvas.height);
-          // create new particles
+
+          // إخفاء العنصر القديم (Wuv U...) تماماً عشان ميظهرش فوق كلامنا
+          var oldElements = document.getElementsByClassName('namebox');
+          for (var e = 0; e < oldElements.length; e++) { oldElements[e].style.display = 'none'; }
+
+          // رسم وتحديث الألعاب النارية (الصواريخ) في الخلفية
+          updateAndDrawFireworks(context, fireworks);
+
+          // رسم جزيئات القلب الأصلي
           var amount = particleRate * deltaTime;
           for (var i = 0; i < amount; i++) {
             var pos = pointOnHeart(Math.PI - 2 * Math.PI * Math.random());
             var dir = pos.clone().length(settings.particles.velocity);
             particles.add(canvas.width / 2 + pos.x, canvas.height / 2 - pos.y, dir.x, -dir.y);
           }
-          // update and draw particles
           particles.update(deltaTime);
           particles.draw(context, image);
+
+          // إعدادات الخط واللون مع تأثير الوميض والنور (Glow Effect)
+          context.fillStyle = '#ffffff'; // لون الكلام أبيض عشان الإضاءة تبان قوية
+          context.font = 'bold 44px Arial'; 
+          context.textAlign = 'center';
+          context.textBaseline = 'middle';
+          
+          context.shadowBlur = 15; // قوة انتشار النور حوالين الكلمة
+          context.shadowColor = '#ff69b4'; // لون النور (وردي نيون)
+
+          // طبع السطر الأول (Happy Birthday) في المنتصف العلوي
+          context.fillText('i love you ', canvas.width / 2, (canvas.height / 2) - 30); 
+          
+          // طبع السطر الثاني (Manon) تحت السطر الأول بالظبط
+          context.fillText('Yaqeen', canvas.width / 2, (canvas.height / 2) + 30);
+          
+          context.shadowBlur = 0; // إعادة تصفير النور لحماية الأنميشن
         }
-        // handle (re-)sizing of the canvas
+        
+        // دالة تصنيع وتحديث الصواريخ والفرقعة برة القلب
+        function updateAndDrawFireworks(ctx, list) {
+          if (Math.random() < 0.03) {
+            list.push({
+              x: Math.random() * ctx.canvas.width,
+              y: ctx.canvas.height,
+              tx: Math.random() * ctx.canvas.width,
+              ty: Math.random() * (ctx.canvas.height * 0.6),
+              color: 'hsl(' + (Math.random() * 360) + ', 100%, 60%)',
+              exploded: false,
+              particles: [],
+              velY: -(Math.random() * 4 + 7)
+            });
+          }
+
+          for (var i = list.length - 1; i >= 0; i--) {
+            var f = list[i];
+            if (!f.exploded) {
+              f.y += f.velY;
+              ctx.fillStyle = f.color;
+              ctx.fillRect(f.x, f.y, 3, 10);
+
+              if (f.y <= f.ty) {
+                f.exploded = true;
+                for (var p = 0; p < 40; p++) {
+                  var angle = Math.random() * Math.PI * 2;
+                  var speed = Math.random() * 4 + 2;
+                  f.particles.push({
+                    x: f.x,
+                    y: f.y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    alpha: 1,
+                    gravity: 0.08
+                  });
+                }
+              }
+            } else {
+              for (var j = f.particles.length - 1; j >= 0; j--) {
+                var p = f.particles[j];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.alpha -= 0.015;
+
+                if (p.alpha <= 0) {
+                  f.particles.splice(j, 1);
+                } else {
+                  ctx.fillStyle = f.color;
+                  ctx.globalAlpha = p.alpha;
+                  ctx.beginPath();
+                  ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                  ctx.fill();
+                }
+              }
+              ctx.globalAlpha = 1.0;
+
+              if (f.particles.length === 0) {
+                list.splice(i, 1);
+              }
+            }
+          }
+        }
+
         function onResize() {
           canvas.width = canvas.clientWidth;
           canvas.height = canvas.clientHeight;
         }
         window.onresize = onResize;
-        // delay rendering bootstrap
         setTimeout(function () {
           onResize();
           render();
@@ -880,7 +937,7 @@ S.Shape = (function () {
           dots[i].move(new S.Point({
             x: Math.random() * a.w,
             y: Math.random() * a.h,
-            a: 0.3, //.4
+            a: 0.3, 
             z: Math.random() * 4,
             h: 0
           }));
